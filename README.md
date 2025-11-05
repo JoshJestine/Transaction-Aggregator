@@ -8,6 +8,13 @@ Managing personal finances often requires accessing multiple banking apps, payme
 
 ---
 
+## How to run
+```
+some bash command
+```
+
+---
+
 ## 👥 Target Users  
 - Individuals who use multiple bank accounts, credit/debit cards, or payment apps.  
 - Young professionals, students, and busy adults who want a streamlined overview of their finances.  
