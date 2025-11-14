@@ -10,7 +10,9 @@ Managing personal finances often requires accessing multiple banking apps, payme
 
 ## How to run
 ```
-some bash command
+Add your client_id and sandbox_secret to .env
+
+**Find the above after signing up for plaid.
 ```
 
 ---
