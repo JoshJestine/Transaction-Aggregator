@@ -10,7 +10,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_URL = 'http://localhost:5000';
+  const API_URL = 'http://localhost:5050';
 
   // Generate link token on component mount
   useEffect(() => {
