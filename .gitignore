@@ -1,8 +1,11 @@
-# Ignore backend environment variables
-backend/.env
+# Dependencies
+node_modules/
+package-lock.json
 
-# Ignore frontend environment variables
-frontend/.env
+# Ignore environment variables
+.env
+*.env
+!.env.example
 
-# Ignore macOS system files
+# Ignore OS system files
 .DS_Store
