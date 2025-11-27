@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import { CreditCard, TrendingDown, TrendingUp, Building, Calendar } from 'lucide-react';
+import { Building, Wallet, TrendingUp, Lightbulb } from 'lucide-react';
 import './App.css';
+
+// Components
+import Header from './components/Header';
+import MetricCard from './components/MetricCard';
+import IncomeChart from './components/IncomeChart';
+import QuickActions from './components/QuickActions';
 
 function App() {
   const [linkToken, setLinkToken] = useState(null);
@@ -15,11 +21,15 @@ function App() {
   // Generate link token on component mount
   useEffect(() => {
     async function createLinkToken() {
-      const response = await fetch(`${API_URL}/api/create_link_token`, {
-        method: 'POST',
-      });
-      const data = await response.json();
-      setLinkToken(data.link_token);
+      try {
+        const response = await fetch(`${API_URL}/api/create_link_token`, {
+          method: 'POST',
+        });
+        const data = await response.json();
+        setLinkToken(data.link_token);
+      } catch (error) {
+        console.error("Error creating link token:", error);
+      }
     }
     createLinkToken();
   }, []);
@@ -27,7 +37,7 @@ function App() {
   // Handle successful link
   const onSuccess = async (public_token) => {
     setIsLoading(true);
-    
+
     // Exchange public token
     await fetch(`${API_URL}/api/set_access_token`, {
       method: 'POST',
@@ -63,7 +73,7 @@ function App() {
 
   const { open, ready } = usePlaidLink(config);
 
-  const totalBalance = accounts.reduce((sum, acc) => sum + acc.balances.current, 0);
+  // Calculate metrics
   const monthlyExpenses = transactions
     .filter(t => t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
@@ -71,114 +81,100 @@ function App() {
     .filter(t => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
+  // Mock data for the chart (combining historical and forecast)
+  const chartData = [
+    { month: 'Jun', amount: 4200, isForecast: false },
+    { month: 'Jul', amount: 4500, isForecast: false },
+    { month: 'Aug', amount: 4100, isForecast: false },
+    { month: 'Sep', amount: 4800, isForecast: false },
+    { month: 'Oct', amount: 5100, isForecast: false },
+    { month: 'Nov', amount: 4900, isForecast: false },
+    { month: 'Dec', amount: 5300, isForecast: true },
+    { month: 'Jan', amount: 5500, isForecast: true },
+    { month: 'Feb', amount: 5800, isForecast: true },
+  ];
+
+  // Handle logout
+  const handleLogout = () => {
+    setIsConnected(false);
+    setAccounts([]);
+    setTransactions([]);
+  };
+
   return (
     <div className="app">
-      <div className="container">
-        <div className="header">
-          <div className="header-content">
-            <div className="icon-badge">
-              <CreditCard size={28} />
-            </div>
-            <div>
-              <h1>Transaction Aggregator</h1>
-              <p>Powered by Plaid API</p>
-            </div>
-          </div>
-          {!isConnected && (
-            <button
-              onClick={() => open()}
-              disabled={!ready || isLoading}
-              className="connect-button"
-            >
-              {isLoading ? 'Connecting...' : 'Connect Bank Account'}
-            </button>
-          )}
-        </div>
+      <Header isConnected={isConnected} onLogout={handleLogout} />
 
+      <main className="dashboard-content">
         {!isConnected ? (
-          <div className="empty-state">
-            <Building size={64} />
-            <h2>Connect Your Bank</h2>
-            <p>Securely link your bank accounts to view all transactions</p>
+          <div className="connect-state">
+            <div className="connect-card">
+              <Building size={64} className="connect-icon" />
+              <h2>Connect Your Bank</h2>
+              <p>Securely link your bank accounts to enable the Financial Advisory Dashboard.</p>
+              <button
+                onClick={() => open()}
+                disabled={!ready || isLoading}
+                className="connect-button"
+              >
+                {isLoading ? 'Connecting...' : 'Connect Bank Account'}
+              </button>
+            </div>
           </div>
         ) : (
-          <>
-            <div className="stats-grid">
-              <div className="stat-card balance">
-                <div className="stat-header">
-                  <span>Total Balance</span>
-                  <TrendingUp size={20} />
-                </div>
-                <p className="stat-value">${totalBalance.toFixed(2)}</p>
+          <div className="dashboard-grid">
+            {/* Key Metrics Row */}
+            <div className="metrics-row">
+              <MetricCard
+                title="Total Income"
+                value={`$${monthlyIncome.toFixed(2)}`}
+                type="income"
+                trend={12}
+                icon={Wallet}
+              />
+              <MetricCard
+                title="Total Expenses"
+                value={`$${monthlyExpenses.toFixed(2)}`}
+                type="expense"
+                trend={-5}
+                icon={TrendingUp}
+              />
+              <MetricCard
+                title="AI Savings Tip"
+                description="You could save $150 by switching your internet provider."
+                type="savings"
+                icon={Lightbulb}
+              />
+            </div>
+
+            {/* Main Content Row: Chart + Quick Actions */}
+            <div className="main-row">
+              <div className="chart-section">
+                <IncomeChart data={chartData} />
               </div>
-              <div className="stat-card income">
-                <div className="stat-header">
-                  <span>Income</span>
-                  <TrendingUp size={20} />
-                </div>
-                <p className="stat-value">${monthlyIncome.toFixed(2)}</p>
-              </div>
-              <div className="stat-card expenses">
-                <div className="stat-header">
-                  <span>Expenses</span>
-                  <TrendingDown size={20} />
-                </div>
-                <p className="stat-value">${monthlyExpenses.toFixed(2)}</p>
+              <div className="actions-section">
+                <QuickActions />
               </div>
             </div>
 
-            <div className="section">
-              <h2>Connected Accounts ({accounts.length})</h2>
-              <div className="accounts-grid">
-                {accounts.map((account) => (
-                  <div key={account.account_id} className="account-card">
-                    <div className="account-header">
-                      <span className="account-name">{account.name}</span>
-                      <span className="account-type">{account.type}</span>
-                    </div>
-                    <p className="account-mask">****{account.mask}</p>
-                    <p className="account-balance">
-                      ${account.balances.current.toFixed(2)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="section">
-              <h2>Recent Transactions ({transactions.length})</h2>
+            {/* Recent Transactions (Optional/Below fold) */}
+            <div className="transactions-section">
+              <h3>Recent Transactions</h3>
               <div className="transactions-list">
-                {transactions.slice(0, 20).map((transaction) => (
-                  <div key={transaction.transaction_id} className="transaction-item">
-                    <div className="transaction-icon">
-                      {transaction.amount < 0 ? (
-                        <TrendingUp className="income-icon" />
-                      ) : (
-                        <TrendingDown className="expense-icon" />
-                      )}
-                    </div>
-                    <div className="transaction-details">
-                      <p className="transaction-name">{transaction.name}</p>
-                      <div className="transaction-meta">
-                        <Calendar size={14} />
-                        <span>{transaction.date}</span>
-                        <span>•</span>
-                        <span className="category-badge">
-                          {transaction.category?.[0] || 'Other'}
-                        </span>
-                      </div>
-                    </div>
-                    <p className={`transaction-amount ${transaction.amount < 0 ? 'income' : 'expense'}`}>
-                      {transaction.amount < 0 ? '+' : '-'}$
-                      {Math.abs(transaction.amount).toFixed(2)}
-                    </p>
+                {transactions.slice(0, 5).map((t) => (
+                  <div key={t.transaction_id} className="transaction-row">
+                    <span className="t-name">{t.name}</span>
+                    <span className="t-date">{t.date}</span>
+                    <span className={`t-amount ${t.amount < 0 ? 'income' : 'expense'}`}>
+                      {t.amount < 0 ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-          </>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

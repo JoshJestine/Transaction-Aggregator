@@ -54,10 +54,10 @@ app.post('/api/set_access_token', async (req, res) => {
     const response = await plaidClient.itemPublicTokenExchange({
       public_token: public_token,
     });
-    
+
     accessToken = response.data.access_token;
     console.log('Access token received');
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error('Error exchanging token:', error);
@@ -75,7 +75,7 @@ app.get('/api/accounts', async (req, res) => {
     const response = await plaidClient.accountsGet({
       access_token: accessToken,
     });
-    
+
     res.json(response.data);
   } catch (error) {
     console.error('Error getting accounts:', error);
@@ -102,7 +102,7 @@ app.post('/api/transactions', async (req, res) => {
         offset: 0,
       },
     });
-    
+
     res.json(response.data);
   } catch (error) {
     console.error('Error getting transactions:', error);
