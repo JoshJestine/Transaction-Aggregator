@@ -72,9 +72,9 @@ if not st.session_state.username:
     st.markdown("---")
     st.markdown("""
         ##### What is this?
-        **SpendLens** turns your transaction history into a simple, human-readable story. 
-        Instead of overwhelming dashboards, you get a calm, 4-act narrative tailored to your current mood, 
-        plus a friendly AI mentor to answer your questions.
+        - **SpendLens** turns your transaction history into simple, human-readable insights. 
+        - Instead of overwhelming dashboards, you get a calm, insightful narrative tailored to your current mood.  
+        - Plus a friendly AI mentor to answer your questions.
     """)
             
 # --- Main App ---
@@ -82,13 +82,13 @@ else:
     st.image("assets/SpendLensLogo.png", width=250)
     
     # --- Header ---
-    col_header, col_logout = st.columns([4, 1])
+    col_header, _, col_logout = st.columns([4, 3.5, 1])
     with col_header:
         st.title(f"Welcome, {st.session_state.username}! 👋")
     with col_logout:
         if st.button("Log Out 👤"):
-            logout()
-            
+            logout()         
+    
     # st.caption(APP_NAME)
     st.markdown("""
         **Your monthly spending, explained simply.**  
@@ -104,7 +104,7 @@ else:
         col1, col2 = st.columns(2)
         
         with col1:
-            uploaded_file = st.file_uploader("Upload CSV", type=["csv"], help="Required columns: date, description, amount")
+            uploaded_file = st.file_uploader("Upload CSV", type=["csv"], help="Required columns: date, description, amount | Optional columns: category")
             
         with col2:
             st.write("Or try with sample data:")
@@ -170,8 +170,8 @@ else:
                 
                 # --- Generate Story ---
                 if st.session_state.story is None:
-                    if st.button("✨ Generate My Money Story", type="primary"):
-                        with st.spinner("Writing your story..."):
+                    if st.button("✨ Generate My Money Narrative", type="primary"):
+                        with st.spinner("Writing your narrative..."):
                             story = generate_money_story(st.session_state.stats, st.session_state.mood)
                             st.session_state.story = story
                             st.rerun()
