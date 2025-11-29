@@ -1,11 +1,20 @@
-# Dependencies
-node_modules/
-package-lock.json
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
 
-# Ignore environment variables
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Environment Variables
 .env
-*.env
-!.env.example
 
-# Ignore OS system files
+# OS/Editor
 .DS_Store
+.vscode/
+.idea/
+
+# miscellaneous
+context.txt
