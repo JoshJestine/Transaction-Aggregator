@@ -92,7 +92,7 @@ else:
     # st.caption(APP_NAME)
     st.markdown("""
         **Your monthly spending, explained simply.**  
-        Upload your transactions to get a personalized, stress-free story about your money.
+        Upload your transactions to get a personalized, stress-free narrative about your money.
     """)
 
     st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server (except for the anonymized stats sent to the AI to write your story).")
@@ -230,7 +230,7 @@ else:
             st.markdown("### 💬 Money Mentor Chat")
             
             # Container for chat history to make it scrollable/contained
-            with st.container(height=600, border=True):
+            with st.container(height=400, border=True):
                 # Display chat history
                 if not st.session_state.chat_history:
                     st.info("Ask me anything about your spending!")
