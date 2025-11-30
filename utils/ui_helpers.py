@@ -176,6 +176,32 @@ def render_story_grid(story_data):
             height: 200px;
             object-fit: cover;
         }
+        
+        /* Rule Card Styles for Accessibility Modal */
+        .rule-card {
+            background-color: #1E212B;
+            border: 1px solid #00ADB5;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 200px; /* Fixed min-height for alignment */
+            height: 100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .rule-header {
+            color: #00ADB5;
+            font-size: 1.0rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 173, 181, 0.2);
+            padding-bottom: 5px;
+        }
+        .rule-text {
+            color: #E0E0E0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -293,6 +319,58 @@ def render_metric_card(label, value, help_text=None):
     Using native st.metric for simplicity and consistency.
     """
     st.metric(label=label, value=value, help=help_text)
+
+@st.dialog("Accessibility Features", width="large")
+def show_accessibility_modal():
+    """
+    Display a modal with accessibility information and Shneiderman's rules.
+    """
+    st.write("The application was designed with accessibility in mind, following established HCAI and HCI guidelines to ensure all users can effectively use our financial narrative tool.")
+    
+    st.markdown("""
+                ## Shneiderman's Eight Golden Rules of Interface Design
+                Our application follows Ben Shneiderman's foundational principles for creating effective, accessible, and user-friendly interfaces:
+                """)
+    
+    rules = [
+        {"title": "1. Strive for Consistency", "text": "We utilize a cohesive 'Dark & Teal' design system across the entire application. From the 'Log Out' button to the 'Money Mentor' chat, every interactive element shares identical typography, border-radius, and hover states, ensuring users always recognize actionable items."},
+        
+        {"title": "2. Cater to Universal Usability", "text": "Beyond standard navigation, we include a dedicated Accessibility Mode (Colorblind/High-Contrast) and a sample data option. This ensures that everyone—from power users to first-time visitors—can interact with the financial narrative without barriers."},
+        
+        {"title": "3. Offer Informative Feedback", "text": "The application keeps users informed at every step. File uploads display immediate success messages, the 'Money Mentor' indicates when it is processing a response, and the 'Generate Story' button visually updates to confirm the narrative is being created."},
+        
+        {"title": "4. Design Dialogs to Yield Closure", "text": "The user journey is designed with a beginning, middle, and end. It starts with data onboarding (Upload), moves to exploration (Dashboard & Mood Selection), and concludes with a finalized output (The Money Storybook), giving users a sense of accomplishment."},
+        
+        {"title": "5. Prevent Errors", "text": "We minimize user errors by restricting file uploads to CSV formats and providing 'Sample Data' for safe testing. Privacy disclaimers and local-processing notifications reassure users that their financial data is handled correctly without accidental server leaks."},
+        
+        {"title": "6. Permit Easy Reversal of Actions", "text": "Mistakes happen. Users can instantly reset their analysis via the 'Reset / Clear Data' button or remove specific chat histories using the trash-can icon, allowing for a stress-free exploration of their financial data."},
+        
+        {"title": "7. Keep Users in Control", "text": "The AI does not force a narrative; the user acts as the conductor. By selecting specific 'Moods' (e.g., Optimistic vs. Cautious), the user explicitly directs the tone of the analysis, ensuring the output aligns with their emotional state."},
+        
+        {"title": "8. Reduce Short-Term Memory Load", "text": "The 'Money Insights' dashboard (Total Spending, Net Flow) remains fixed at the top, and the 'Money Mentor' chat retains conversation history. This allows users to explore detailed stories without having to memorize or recall their aggregate numbers."}
+    ]
+    
+    # Grid Layout: 3 columns
+    # We will iterate and create rows of 3
+    
+    for i in range(0, len(rules), 3):
+        cols = st.columns(3)
+        for j in range(3):
+            if i + j < len(rules):
+                rule = rules[i + j]
+                with cols[j]:
+                    # Using inline styles to ensure rendering inside the modal
+                    html = f"""
+                    <div style="background-color: #1E212B; border: 1px solid #333; border-radius: 8px; padding: 15px; min-height: 175px; height: 100%; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; margin-bottom: 20px;">
+                        <div style="color: #00ADB5; font-size: 1.0rem; font-weight: 700; margin-bottom: 10px; border-bottom: 1px solid rgba(0, 173, 181, 0.2); padding-bottom: 5px;">{rule['title']}</div>
+                        <div style="color: #E0E0E0; font-size: 0.9rem; line-height: 1.4;">{rule['text']}</div>
+                    </div>
+                    """
+                    st.markdown(html, unsafe_allow_html=True)
+
+    
+    
+
 
 def get_mood_emojis():
     """

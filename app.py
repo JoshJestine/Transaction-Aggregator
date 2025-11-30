@@ -7,7 +7,7 @@ from config.settings import APP_NAME, SAMPLE_DATA_PATH
 from services.data_processing import load_data, validate_data, compute_stats
 from services.story_generator import generate_money_story
 from services.chat import generate_chat_response
-from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis, render_insights_card, render_story_grid
+from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis, render_insights_card, render_story_grid, show_accessibility_modal
 
 
 
@@ -58,10 +58,24 @@ def clear_data():
 
 # --- Welcome Screen ---
 if not st.session_state.username:
-    col_l, col_c, col_r = st.columns([1, 0.55, 1])
+    # Header: Spacer | Logo (Centered) | Accessibility (Right)
+    # Using [1, 5, 1] to ensure symmetry for centering the logo, while keeping button on far right.
+    col_l, col_c, col_r, col_ = st.columns([1, 0.65, 1, 0.4], vertical_alignment="center")
     
     with col_c:
+        # Centered Logo
+        # Use columns inside to center the image if needed, or just standard image centering
+        # st.image doesn't have alignment, but inside a column it aligns left.
+        # To center, we can use another set of columns or CSS.
+        # Or just rely on the column being centered? No, content aligns left.
+        # Let's use the 'use_container_width' and maybe a smaller column ratio if we want it tight?
+        # User said "image stays in its current position in center of screen".
+        # Let's try to just place it in the middle column.
         st.image("assets/SpendLensLogo.png", use_container_width=True)
+        
+    with col_:
+        if st.button("♿ Accessibility", help="Accessibility Info", use_container_width=True, type="primary"):
+            show_accessibility_modal()
     
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -93,20 +107,26 @@ if not st.session_state.username:
         - Instead of overwhelming dashboards, you get a calm, insightful narrative tailored to your current mood.  
         - Plus a friendly AI mentor to answer your questions.
     """)
+    
+    st.error("⚠️ **Disclaimer:** This is not professional financial advice. Outputs are for reflection and education only.", width=720)
             
 # --- Main App ---
 else:
     # --- Header ---
-    # Use columns to create a header row with Logo (Left) and Logout (Right)
-    col_logo, _, col_logout = st.columns([1, 3, 1])
+    # Header Layout: Logo | Accessibility | Logout
+    col_logo, col_access, col_logout = st.columns([8, 1, 1], vertical_alignment="center")
     
     with col_logo:
         st.image("assets/SpendLensLogo.png", width=200)
         
+    with col_access:
+        if st.button("♿ Accessibility", key="access_btn_dash", help="Accessibility Info", use_container_width=True, type="primary"):
+            show_accessibility_modal()
+
     with col_logout:
         # Using a container to push button to the right if needed, 
         # but standard column behavior with use_container_width should be fine or just default.
-        if st.button("Log Out 👤", use_container_width=True, type="primary"):
+        if st.button("➜] Log Out", use_container_width=True, type="primary", help="Go Back to Login Page"):
             logout()
 
     st.title(f"Welcome, {st.session_state.username}! 👋")         
@@ -117,7 +137,7 @@ else:
         Upload your transactions to get a personalized, stress-free narrative about your money.
     """)
 
-    st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server (except for the anonymized stats sent to the AI to write your story).")
+    st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width=875)
 
     # --- Data Input Section ---
     if st.session_state.stats is None:
@@ -130,7 +150,7 @@ else:
             
         with col2:
             st.write("Or try with sample data:")
-            if st.button("Use Sample Data", type="primary"):
+            if st.button("🗂️ Use Sample Data", type="primary"):
                 try:
                     if os.path.exists(SAMPLE_DATA_PATH):
                         uploaded_file = SAMPLE_DATA_PATH
@@ -163,17 +183,18 @@ else:
         
         # --- LEFT COLUMN: Main Content ---
         with col_main:
-            # Show Data Preview
+            # Show Data Editor
             if st.session_state.df is not None:
-                with st.expander("📊 View Uploaded Data (First 5 rows)"):
-                    # Create a copy for display to avoid messing with the actual data used for stats
-                    display_df = st.session_state.df.head().copy()
-                    # Format date if it's a datetime column
-                    if pd.api.types.is_datetime64_any_dtype(display_df['date']):
-                         display_df['date'] = display_df['date'].dt.strftime('%Y-%m-%d')
-                    st.dataframe(display_df)
+                with st.expander("📊 Manage Data", expanded=False):
+                    edited_df = st.data_editor(st.session_state.df, num_rows="dynamic", key='data_editor')
+                    
+                    # Sync state if data changed
+                    if not edited_df.equals(st.session_state.df):
+                        st.session_state.df = edited_df
+                        st.session_state.stats = compute_stats(edited_df)
+                        st.rerun()
             
-            if st.button("🔄 Reset / Clear Data", use_container_width=True, type="primary"):
+            if st.button("🔄 Reset / Clear Data", use_container_width=True, type="primary", help="Clear All Data"):
                 clear_data()
 
             st.divider()
@@ -198,7 +219,11 @@ else:
                             btn_type = "primary" if st.session_state.mood == mood_name else "secondary"
                             
                             if st.button(f"{emoji}\n{mood_name}", key=f"mood_{mood_name}", use_container_width=True, type=btn_type):
-                                st.session_state.mood = mood_name
+                                # Toggle logic: If already selected, deselect. Otherwise, select.
+                                if st.session_state.mood == mood_name:
+                                    st.session_state.mood = None
+                                else:
+                                    st.session_state.mood = mood_name
                                 st.rerun()
             
             if st.session_state.mood:
@@ -235,6 +260,8 @@ else:
                         st.markdown(st.session_state.story)
                     
                     st.divider()
+
+            st.error("⚠️ **Disclaimer:** This is not professional financial advice. Outputs are for reflection and education only.")
 
         # --- RIGHT COLUMN: Chatbot ---
         with col_chat:
@@ -298,14 +325,46 @@ else:
                     # Add assistant response to history
                     st.session_state.chat_history.append({"role": "assistant", "content": response})
                     st.rerun()
+            
+            st.divider()
+            st.markdown("### 📚 Financial Resources")
+            
+            resources = [
+                { "title": "Budgeting Basics", "source": "Consumer.gov", "url": "https://consumer.gov/managing-your-money/making-budget" },
+                { "title": "Saving and Investing", "source": "Investor.gov (SEC)", "url": "https://www.investor.gov/introduction-investing" },
+                { "title": "Understanding Credit", "source": "CFPB", "url": "https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/" },
+                { "title": "Retirement Planning", "source": "SSA.gov", "url": "https://www.ssa.gov/benefits/retirement/" },
+                { "title": "Debt Management", "source": "FTC", "url": "https://consumer.ftc.gov/articles/coping-debt" },
+                { "title": "Financial Education", "source": "MyMoney.gov", "url": "https://www.mymoney.gov/" }
+            ]
+            
+            # Grid Layout for Resources
+            for i in range(0, len(resources), 2):
+                res_col1, res_col2 = st.columns(2, gap="small")
+                
+                # Item 1
+                if i < len(resources):
+                    res = resources[i]
+                    with res_col1:
+                        st.link_button(f"{res['title']}", res['url'], help=f"Source: {res['source']}", use_container_width=True)
+                
+                # Item 2
+                if i + 1 < len(resources):
+                    res = resources[i+1]
+                    with res_col2:
+                        st.link_button(f"{res['title']}", res['url'], help=f"Source: {res['source']}", use_container_width=True)
+                    
+
 
 # Footer
 # st.markdown("---")
-st.markdown(
-    """
-    <div style="font-size:16px; color:#b00020; font-weight:400;">
-        ⚠️ <strong>Disclaimer:</strong> This is not professional financial advice. Outputs are for reflection and education only.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# st.markdown(
+#     """
+#     <div style="font-size:16px; color:#c91f16; font-weight:400;">
+#         ⚠️ <strong>Disclaimer:</strong> This is not professional financial advice. Outputs are for reflection and education only.
+#     </div>
+#     """,
+#     unsafe_allow_html=True
+# )
+
+# st.error("⚠️ **Disclaimer:** This is not professional financial advice. Outputs are for reflection and education only.", width=720)
