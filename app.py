@@ -7,7 +7,9 @@ from config.settings import APP_NAME, SAMPLE_DATA_PATH
 from services.data_processing import load_data, validate_data, compute_stats
 from services.story_generator import generate_money_story
 from services.chat import generate_chat_response
-from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis
+from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis, render_insights_card
+
+
 
 # Page Config
 st.set_page_config(
@@ -16,7 +18,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.markdown('<style>body {background-color: #051d42;}</style>', unsafe_allow_html=True)
+
 
 # Apply custom styles
 apply_custom_styles()
@@ -63,7 +65,7 @@ if not st.session_state.username:
     
     with st.form("welcome_form"):
         name_input = st.text_input("What should we call you?")
-        submitted = st.form_submit_button("Get Started 🚀")
+        submitted = st.form_submit_button("Get Started 🚀", type="primary")
         
         if submitted and name_input:
             st.session_state.username = name_input.strip().title()
@@ -89,7 +91,7 @@ else:
     with col_logout:
         # Using a container to push button to the right if needed, 
         # but standard column behavior with use_container_width should be fine or just default.
-        if st.button("Log Out 👤", use_container_width=True):
+        if st.button("Log Out 👤", use_container_width=True, type="primary"):
             logout()
 
     st.title(f"Welcome, {st.session_state.username}! 👋")         
@@ -113,7 +115,7 @@ else:
             
         with col2:
             st.write("Or try with sample data:")
-            if st.button("Use Sample Data"):
+            if st.button("Use Sample Data", type="primary"):
                 try:
                     if os.path.exists(SAMPLE_DATA_PATH):
                         uploaded_file = SAMPLE_DATA_PATH
@@ -158,6 +160,12 @@ else:
             
             if st.button("🔄 Reset / Clear Data", use_container_width=True, type="primary"):
                 clear_data()
+
+            st.divider()
+            # Render Custom Insights Card
+            render_insights_card(st.session_state.stats)
+            
+            st.divider()
                     
             # --- Mood Selection ---
             st.header("How are you feeling about money this month?")
@@ -178,24 +186,16 @@ else:
                 st.success(f"Selected Mood: {moods[st.session_state.mood]} {st.session_state.mood}")
                 
                 # --- Generate Story ---
-                if st.session_state.story is None:
-                    if st.button("✨ Generate My Money Narrative", type="primary"):
-                        with st.spinner("Writing your narrative..."):
-                            story = generate_money_story(st.session_state.stats, st.session_state.mood)
-                            st.session_state.story = story
-                            st.rerun()
+                # Always show generate button to allow regeneration
+                if st.button("✨ Generate My Money Narrative", type="primary"):
+                    with st.spinner("Writing your narrative..."):
+                        story = generate_money_story(st.session_state.stats, st.session_state.mood)
+                        st.session_state.story = story
+                        st.rerun()
                 
-                # --- Display Story & Stats ---
+                # --- Display Story ---
                 if st.session_state.story:
                     st.divider()
-                    st.header("Your Money Storybook")
-                    
-                    # Key Stats Row
-                    stats = st.session_state.stats
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("Total Spending", f"${stats['total_spending']:,.2f}")
-                    c2.metric("Top Category", f"{stats['top_categories'][0]['category']}" if stats['top_categories'] else "N/A")
-                    c3.metric("Net Flow", f"${stats['net']:,.2f}", delta_color="normal")
                     
                     # The Story
                     try:
@@ -268,7 +268,7 @@ else:
             # Input for chat (using form to keep it in the column flow)
             with st.form(key="chat_form", clear_on_submit=True):
                 user_input = st.text_area("Ask a question...", height=100)
-                submit_chat = st.form_submit_button("Send", use_container_width=True)
+                submit_chat = st.form_submit_button("Send", use_container_width=True, type="primary")
                 
                 if submit_chat and user_input:
                     # Add user message to history
