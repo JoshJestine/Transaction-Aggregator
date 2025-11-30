@@ -22,7 +22,7 @@ function App() {
   const [messages, setMessages] = useState([{
     id: '1',
     role: 'assistant',
-    content: 'Welcome to your Accessible Financial Advisor! I\'m powered by Google Gemini AI and I\'m here to help you understand budgeting, investments, savings, and more.\n\nTip: Upload your financial data (CSV) for personalized advice based on your actual numbers!\n\nHow can I assist you today?',
+    content: 'Welcome to your Accessible Financial Advisor! I\'m here to help you understand budgeting, investments, savings, and more.\n\nTip: Upload your financial data (CSV) for personalized advice based on your actual numbers!\n\nHow can I assist you today?',
     timestamp: new Date().toISOString()
   }]);
   const [inputValue, setInputValue] = useState('');
@@ -404,7 +404,7 @@ function App() {
         <div className="header-content">
           <div className="logo">
             <div className="logo-icon">💵</div>
-            <div className="logo-text"><h1>FinanceAI</h1><p>Powered by Gemini</p></div>
+            <div className="logo-text"><h1>SpendSense</h1><p>AI-Powered Financial Advisor</p></div>
           </div>
           <nav className="header-actions">
             <button className={`btn ${financialData ? 'btn-success' : 'btn-secondary'}`} onClick={() => fileInputRef.current?.click()} disabled={isUploading} title="Upload CSV (Ctrl+U)">
