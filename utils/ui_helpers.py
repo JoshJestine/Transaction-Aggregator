@@ -6,10 +6,7 @@ def apply_custom_styles():
     """
     st.markdown("""
         <style>
-        .stApp {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+
         .metric-card {
             background-color: #f0f2f6;
             border-radius: 10px;
@@ -46,5 +43,10 @@ def get_mood_emojis():
         "Anxious": "😟",
         "Curious": "🤔",
         "Neutral": "😐",
-        "Motivated": "💪"
+        "Motivated": "💪",
+        "Optimistic": "🌟",
+        "Confident": "😎",
+        "Cautious": "🛡️",
+        "Frustrated": "😤",
+        "Content": "😌"
     }

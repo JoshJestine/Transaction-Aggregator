@@ -79,15 +79,20 @@ if not st.session_state.username:
             
 # --- Main App ---
 else:
-    st.image("assets/SpendLensLogo.png", width=250)
-    
     # --- Header ---
-    col_header, _, col_logout = st.columns([4, 3.5, 1])
-    with col_header:
-        st.title(f"Welcome, {st.session_state.username}! 👋")
+    # Use columns to create a header row with Logo (Left) and Logout (Right)
+    col_logo, _, col_logout = st.columns([1, 3, 1])
+    
+    with col_logo:
+        st.image("assets/SpendLensLogo.png", width=200)
+        
     with col_logout:
-        if st.button("Log Out 👤"):
-            logout()         
+        # Using a container to push button to the right if needed, 
+        # but standard column behavior with use_container_width should be fine or just default.
+        if st.button("Log Out 👤", use_container_width=True):
+            logout()
+
+    st.title(f"Welcome, {st.session_state.username}! 👋")         
     
     # st.caption(APP_NAME)
     st.markdown("""
@@ -158,15 +163,19 @@ else:
             st.header("How are you feeling about money this month?")
             moods = get_mood_emojis()
             
-            # Create columns for mood buttons
-            cols = st.columns(len(moods))
-            for idx, (mood_name, emoji) in enumerate(moods.items()):
-                with cols[idx]:
-                    if st.button(f"{emoji}\n{mood_name}", key=f"mood_{mood_name}", width='stretch'):
-                        st.session_state.mood = mood_name
+            # Create columns for mood buttons in a grid (5 columns per row)
+            mood_items = list(moods.items())
+            for i in range(0, len(mood_items), 5):
+                cols = st.columns(5)
+                for j in range(5):
+                    if i + j < len(mood_items):
+                        mood_name, emoji = mood_items[i + j]
+                        with cols[j]:
+                            if st.button(f"{emoji}\n{mood_name}", key=f"mood_{mood_name}", use_container_width=True):
+                                st.session_state.mood = mood_name
             
             if st.session_state.mood:
-                st.success(f"Selected Mood: {st.session_state.mood} {moods[st.session_state.mood]}")
+                st.success(f"Selected Mood: {moods[st.session_state.mood]} {st.session_state.mood}")
                 
                 # --- Generate Story ---
                 if st.session_state.story is None:
@@ -282,7 +291,7 @@ else:
                     st.rerun()
 
 # Footer
-st.markdown("---")
+# st.markdown("---")
 st.markdown(
     """
     <div style="font-size:14px; color:#b00020; font-weight:600;">
