@@ -63,6 +63,8 @@ if not st.session_state.username:
     with col_c:
         st.image("assets/SpendLensLogo.png", use_container_width=True)
     
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # st.title("👋 Welcome to " + APP_NAME)
     # st.markdown("### Let's get to know you.")
     
@@ -73,7 +75,7 @@ if not st.session_state.username:
         # st.image("assets/SpendLensLogo.png", width=400)
     
         st.title("👋 Welcome to " + APP_NAME)
-        st.markdown("### Let's get to know you.")
+        st.subheader("Let's get to know you.")
         
         
         with st.form("welcome_form"):
@@ -237,11 +239,11 @@ else:
         # --- RIGHT COLUMN: Chatbot ---
         with col_chat:
             # Header with Clear History Button
-            c1, c2 = st.columns([5, 1])
+            c1, c2 = st.columns([5, 1], vertical_alignment="center")
             with c1:
                 st.markdown("### 💬 Money Mentor Chat")
             with c2:
-                if st.button("🗑️", help="Clear Chat History", type="secondary"):
+                if st.button("🔄", help="Clear Chat History", type="primary", use_container_width=True):
                     st.session_state.chat_history = []
                     st.rerun()
             
