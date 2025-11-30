@@ -3,9 +3,6 @@ node_modules/
 package-lock.json
 
 # Ignore environment variables
-.env
-*.env
-!.env.example
 
 # Ignore OS system files
 .DS_Store
