@@ -33,6 +33,17 @@ def apply_custom_styles():
             border-radius: 12px;
         }
         
+        /* File Uploader Button Style */
+        [data-testid='stFileUploader'] button {
+            border-color: #00ADB5;
+            color: #00ADB5;
+        }
+        [data-testid='stFileUploader'] button:hover {
+            border-color: #00ADB5;
+            color: #00ADB5;
+            background-color: rgba(0, 173, 181, 0.1);
+        }
+        
         /* Insight Card Styles */
         .insight-card {
             background-color: #1E212B; /* Slightly lighter than #0E1117 */
@@ -106,6 +117,171 @@ def render_insights_card(stats):
                     ${stats['net']:,.2f}
                 </div>
             </div>
+        </div>
+    </div>
+    """
+    st.markdown(html, unsafe_allow_html=True)
+
+def render_story_grid(story_data):
+    """
+    Render the story acts in a 2x2 grid layout.
+    """
+    if not story_data or "acts" not in story_data:
+        st.error("No story data available.")
+        return
+
+    acts = story_data["acts"]
+    
+    # Custom CSS for story card
+    st.markdown("""
+        <style>
+        .story-card {
+            background-color: #1E212B;
+            border: 1px solid #00ADB5;
+            border-radius: 12px;
+            padding: 20px;
+            height: 400px; /* Fixed height for symmetry */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .story-header {
+            color: #FAFAFA;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 173, 181, 0.3);
+            padding-bottom: 8px;
+        }
+        .story-content {
+            color: #E0E0E0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            flex-grow: 1;
+            overflow-y: auto; /* Scroll if text is too long */
+            padding-right: 5px; /* Space for scrollbar */
+        }
+        /* Custom Scrollbar for Webkit */
+        .story-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .story-content::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 173, 181, 0.5);
+            border-radius: 3px;
+        }
+        .story-image {
+            border-radius: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Create 2x2 Grid
+    # Row 1
+    col1, col2 = st.columns(2, gap="medium")
+    
+    with col1:
+        if len(acts) > 0:
+            render_story_card(acts[0])
+            
+    with col2:
+        if len(acts) > 1:
+            render_story_card(acts[1])
+            
+    # Row 2
+    st.markdown('<div style="height: 25px;"></div>', unsafe_allow_html=True) # Vertical spacer to match horizontal gap
+    col3, col4 = st.columns(2, gap="medium")
+    
+    with col3:
+        if len(acts) > 2:
+            render_story_card(acts[2])
+            
+    with col4:
+        if len(acts) > 3:
+            render_story_card(acts[3])
+
+def render_story_card(act):
+    """
+    Helper to render a single story card.
+    """
+    import urllib.parse
+    
+    safe_prompt = urllib.parse.quote(act['visual_prompt'])
+    image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=400&height=300&nologo=true"
+    
+    # We use a container to apply the styling, but Streamlit containers don't support custom classes directly on the div easily without hacky JS.
+    # So we will render the HTML structure for the card content.
+    # Note: Streamlit markdown with HTML allows us to build the card.
+    
+    # However, rendering the image inside the HTML might be tricky if we want Streamlit's image optimization, 
+    # but standard <img> tag works fine for external URLs.
+    
+    html = f"""
+    <div class="story-card">
+        <div class="story-header">{act['title']}</div>
+        <img src="{image_url}" class="story-image" alt="{act['title']}">
+        <div class="story-content">
+            {act['content']} # We might need to convert markdown to HTML here if content has markdown.
+            # For now, assuming simple text or basic markdown. 
+            # If content has markdown, we should use a library or just let it be text.
+            # The prompt asks for "Markdown allowed", so we should ideally parse it.
+            # But putting markdown inside HTML div in st.markdown(..., unsafe_allow_html=True) doesn't parse the markdown.
+            # We can use a simple replace for bolding if needed, or just display as text.
+            # Let's try to keep it simple: The system prompt says "Markdown allowed".
+            # If we want to render markdown inside this HTML card, it's complex.
+            # Alternative: Use st.container() and styling.
+        </div>
+    </div>
+    """
+    
+    # BETTER APPROACH: Use st.container and apply style to the container? No, can't target specific container.
+    # Let's use the HTML approach but maybe strip markdown or use a simple parser if needed.
+    # Or, we can just render the image and text using Streamlit widgets inside a column, 
+    # and wrap that column in a styled container using a custom component or just CSS targeting?
+    # The user asked for "Wrap the content... inside a styled container".
+    
+    # Let's stick to the HTML card for best visual control, matching the insight card.
+    # We will assume the content is mostly text. If bolding is needed, we can do a quick replace.
+    
+    content_html = act['content'].replace("**", "<b>").replace("**", "</b>") # Simple bold support
+    # Note: The replace above is flawed (replaces both with <b>).
+    # Let's just render the text as is, or use a library if available. 
+    # Actually, let's just use st.markdown inside a container if possible.
+    
+    # Re-evaluating: The user wants a "Card Style".
+    # We can create the card visual using HTML.
+    
+    html = f"""
+    <div class="story-card">
+        <div class="story-header">{act['title']}</div>
+        <img src="{image_url}" class="story-image" alt="{act['title']}">
+        <div class="story-content">
+            {content_html} 
+        </div>
+    </div>
+    """
+    # Wait, the replace logic was bad. Let's fix it or just pass text.
+    # Let's use a regex or just leave it. The browser might display **text**.
+    # Let's try to use `markdown` library if installed, or just `st.markdown`?
+    # We can't nest `st.markdown` inside HTML string.
+    
+    # Revised approach for `render_story_card`:
+    # Use HTML for the container and header/image, but maybe just text for content?
+    # Or better: Just use the HTML and simple formatting.
+    
+    # Let's use a simple bold parser.
+    import re
+    formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', act['content'])
+    
+    html = f"""
+    <div class="story-card">
+        <div class="story-header">{act['title']}</div>
+        <img src="{image_url}" class="story-image" alt="{act['title']}">
+        <div class="story-content">
+            {formatted_content}
         </div>
     </div>
     """

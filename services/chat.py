@@ -22,10 +22,10 @@ def generate_chat_response(history, stats, story_context):
     - You have access to the user's financial stats and the story you just generated.
     - Answer questions based on this data.
     - Explain answers based on visible stats (e.g., “Based on the transactions tagged as Dining…”).
-    - Keep responses under ~200 words.
+    - Keep responses under ~150 words.
     - Always avoid investment advice.
     - Focus on explanation, reflection, and small behavior changes.
-    - Use standard Markdown. Ensure spaces around bolded text. Do not use LaTeX.
+    - Use simple plain text and bullet points for structure.
     """
     
     # Construct the chat history for Gemini

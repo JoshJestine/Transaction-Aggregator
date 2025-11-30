@@ -7,7 +7,7 @@ from config.settings import APP_NAME, SAMPLE_DATA_PATH
 from services.data_processing import load_data, validate_data, compute_stats
 from services.story_generator import generate_money_story
 from services.chat import generate_chat_response
-from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis, render_insights_card
+from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis, render_insights_card, render_story_grid
 
 
 
@@ -58,18 +58,31 @@ def clear_data():
 
 # --- Welcome Screen ---
 if not st.session_state.username:
-    st.image("assets/SpendLensLogo.png", width=400)
+    col_l, col_c, col_r = st.columns([1, 0.55, 1])
     
-    st.title("👋 Welcome to " + APP_NAME)
-    st.markdown("### Let's get to know you.")
+    with col_c:
+        st.image("assets/SpendLensLogo.png", use_container_width=True)
     
-    with st.form("welcome_form"):
-        name_input = st.text_input("What should we call you?")
-        submitted = st.form_submit_button("Get Started 🚀", type="primary")
+    # st.title("👋 Welcome to " + APP_NAME)
+    # st.markdown("### Let's get to know you.")
+    
+    # Center the form (occupy 50% width)
+    col_left, col_center, col_right = st.columns([0.5, 1, 0.5])
+    
+    with col_center:
+        # st.image("assets/SpendLensLogo.png", width=400)
+    
+        st.title("👋 Welcome to " + APP_NAME)
+        st.markdown("### Let's get to know you.")
         
-        if submitted and name_input:
-            st.session_state.username = name_input.strip().title()
-            st.rerun()
+        
+        with st.form("welcome_form"):
+            name_input = st.text_input("What should we call you?")
+            submitted = st.form_submit_button("Get Started 🚀", type="primary", use_container_width=True)
+            
+            if submitted and name_input:
+                st.session_state.username = name_input.strip().title()
+                st.rerun()
 
     st.markdown("---")
     st.markdown("""
@@ -179,11 +192,16 @@ else:
                     if i + j < len(mood_items):
                         mood_name, emoji = mood_items[i + j]
                         with cols[j]:
-                            if st.button(f"{emoji}\n{mood_name}", key=f"mood_{mood_name}", use_container_width=True):
+                            # Determine button type based on selection
+                            btn_type = "primary" if st.session_state.mood == mood_name else "secondary"
+                            
+                            if st.button(f"{emoji}\n{mood_name}", key=f"mood_{mood_name}", use_container_width=True, type=btn_type):
                                 st.session_state.mood = mood_name
+                                st.rerun()
             
             if st.session_state.mood:
-                st.success(f"Selected Mood: {moods[st.session_state.mood]} {st.session_state.mood}")
+                # Removed text confirmation as requested
+                pass
                 
                 # --- Generate Story ---
                 # Always show generate button to allow regeneration
@@ -203,25 +221,7 @@ else:
                         story_data = json.loads(st.session_state.story)
                         
                         if "acts" in story_data:
-                            for act in story_data["acts"]:
-                                with st.container():
-                                    st.markdown(f"### {act['title']}")
-                                    
-                                    # Layout: Image on left, Text on right (or stacked on mobile)
-                                    # Using columns for a "card" feel
-                                    col_img, col_text = st.columns([1, 2])
-                                    
-                                    with col_img:
-                                        # Generate image URL using Pollinations.ai
-                                        # Encode prompt to be URL safe
-                                        safe_prompt = urllib.parse.quote(act['visual_prompt'])
-                                        image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=400&height=300&nologo=true"
-                                        st.image(image_url, width='stretch')
-                                        
-                                    with col_text:
-                                        st.markdown(act['content'])
-                                        
-                                    st.markdown("---") # Divider between acts
+                             render_story_grid(story_data)
                         else:
                             st.markdown(st.session_state.story)
 
@@ -236,7 +236,14 @@ else:
 
         # --- RIGHT COLUMN: Chatbot ---
         with col_chat:
-            st.markdown("### 💬 Money Mentor Chat")
+            # Header with Clear History Button
+            c1, c2 = st.columns([5, 1])
+            with c1:
+                st.markdown("### 💬 Money Mentor Chat")
+            with c2:
+                if st.button("🗑️", help="Clear Chat History", type="secondary"):
+                    st.session_state.chat_history = []
+                    st.rerun()
             
             # Container for chat history to make it scrollable/contained
             with st.container(height=400, border=True):
@@ -294,7 +301,7 @@ else:
 # st.markdown("---")
 st.markdown(
     """
-    <div style="font-size:14px; color:#b00020; font-weight:600;">
+    <div style="font-size:16px; color:#b00020; font-weight:400;">
         ⚠️ <strong>Disclaimer:</strong> This is not professional financial advice. Outputs are for reflection and education only.
     </div>
     """,
