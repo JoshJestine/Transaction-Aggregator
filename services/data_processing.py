@@ -69,20 +69,20 @@ def compute_stats(df):
         )
 
     # Separate income and spending
-    # Assumption: Income is explicitly categorized as 'Income' OR negative amounts if no category?
-    # Let's stick to the prompt: "if everything is positive, interpret as spending unless specified otherwise"
-    # We will use the 'Income' category to identify income.
+    # Logic: Positive = Income, Negative = Expense
     
-    income_mask = df['category'].str.lower() == 'income'
-    income_df = df[income_mask]
-    spending_df = df[~income_mask]
+    income_df = df[df['amount'] > 0]
+    spending_df = df[df['amount'] < 0].copy()
+    
+    # Convert spending amounts to positive for calculation/display
+    spending_df['abs_amount'] = spending_df['amount'].abs()
     
     total_income = income_df['amount'].sum()
-    total_spending = spending_df['amount'].sum()
-    net = total_income - total_spending
+    total_spending = spending_df['abs_amount'].sum()
+    net = df['amount'].sum()
     
-    # Top categories
-    category_spend = spending_df.groupby('category')['amount'].sum().sort_values(ascending=False)
+    # Top categories (based on spending)
+    category_spend = spending_df.groupby('category')['abs_amount'].sum().sort_values(ascending=False)
     top_categories = []
     for cat, amount in category_spend.head(3).items():
         top_categories.append({
@@ -92,14 +92,14 @@ def compute_stats(df):
         })
         
     # Highest spending day
-    daily_spend = spending_df.groupby(spending_df['date'].dt.date)['amount'].sum().sort_values(ascending=False)
+    daily_spend = spending_df.groupby(spending_df['date'].dt.date)['abs_amount'].sum().sort_values(ascending=False)
     if not daily_spend.empty:
         highest_day_date = daily_spend.index[0]
         highest_day_amount = daily_spend.iloc[0]
         
         # Get top merchants for that day
         day_txns = spending_df[spending_df['date'].dt.date == highest_day_date]
-        top_merchants = day_txns.sort_values('amount', ascending=False)['description'].head(3).tolist()
+        top_merchants = day_txns.sort_values('abs_amount', ascending=False)['description'].head(3).tolist()
         
         highest_day = {
             "date": highest_day_date.strftime("%Y-%m-%d"),
@@ -116,12 +116,11 @@ def compute_stats(df):
         if top_cat_pct > 40:
             anomalies.append(f"High spending in {category_spend.index[0]} ({top_cat_pct:.1f}% of total)")
             
-    # Single large transactions (excluding rent/housing if possible, but let's keep it simple)
-    # Let's flag transactions > 30% of total spending (if total > 0)
+    # Single large transactions
     if total_spending > 0:
-        large_txns = spending_df[spending_df['amount'] > (total_spending * 0.3)]
+        large_txns = spending_df[spending_df['abs_amount'] > (total_spending * 0.3)]
         for _, row in large_txns.iterrows():
-            anomalies.append(f"Large transaction: {row['description']} (${row['amount']:.2f})")
+            anomalies.append(f"Large transaction: {row['description']} (${row['abs_amount']:.2f})")
 
     return {
         "total_income": float(total_income),

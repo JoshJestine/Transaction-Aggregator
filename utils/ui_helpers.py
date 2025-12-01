@@ -104,6 +104,10 @@ def render_insights_card(stats):
         <div class="insight-header">Your Money Insights</div>
         <div class="insight-metrics-container">
             <div class="insight-metric">
+                <div class="insight-metric-label">Total Income</div>
+                <div class="insight-metric-value" style="color: #4ade80;">${stats['total_income']:,.2f}</div>
+            </div>
+            <div class="insight-metric">
                 <div class="insight-metric-label">Total Spending</div>
                 <div class="insight-metric-value">${stats['total_spending']:,.2f}</div>
             </div>

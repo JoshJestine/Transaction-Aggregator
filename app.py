@@ -3,13 +3,12 @@ import pandas as pd
 import os
 import json
 import urllib.parse
+import altair as alt
 from config.settings import APP_NAME, SAMPLE_DATA_PATH
 from services.data_processing import load_data, validate_data, compute_stats
 from services.story_generator import generate_money_story
 from services.chat import generate_chat_response
 from utils.ui_helpers import apply_custom_styles, render_metric_card, get_mood_emojis, render_insights_card, render_story_grid, show_accessibility_modal
-
-
 
 # Page Config
 st.set_page_config(
@@ -17,8 +16,6 @@ st.set_page_config(
     page_icon="📖",
     layout="wide"
 )
-
-
 
 # Apply custom styles
 apply_custom_styles()
@@ -36,6 +33,8 @@ if "df" not in st.session_state:
     st.session_state.df = None
 if "username" not in st.session_state:
     st.session_state.username = None
+if "active_view" not in st.session_state:
+    st.session_state.active_view = "story"
 
 def logout():
     """Clear all session state data including username."""
@@ -114,19 +113,19 @@ if not st.session_state.username:
 else:
     # --- Header ---
     # Header Layout: Logo | Accessibility | Logout
-    col_logo, col_access, col_logout = st.columns([8, 1, 1], vertical_alignment="center")
+    col_logo, col_access, col_logout = st.columns([8, 1.1, 1.1], vertical_alignment="center")
     
     with col_logo:
         st.image("assets/SpendLensLogo.png", width=200)
         
     with col_access:
-        if st.button("♿ Accessibility", key="access_btn_dash", help="Accessibility Info", use_container_width=True, type="primary"):
+        if st.button("♿ Accessibility", key="access_btn_dash", help="Accessibility Info", width="stretch", type="primary"):
             show_accessibility_modal()
 
     with col_logout:
         # Using a container to push button to the right if needed, 
         # but standard column behavior with use_container_width should be fine or just default.
-        if st.button("➜] Log Out", use_container_width=True, type="primary", help="Go Back to Login Page"):
+        if st.button("➜] Log Out", width="stretch", type="primary", help="Go Back to Login Page"):
             logout()
 
     st.title(f"Welcome, {st.session_state.username}! 👋")         
@@ -137,18 +136,21 @@ else:
         Upload your transactions to get a personalized, stress-free narrative about your money.
     """)
 
-    st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width=875)
+    # st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width=875)
 
     # --- Data Input Section ---
     if st.session_state.stats is None:
-        st.header("Add Your Data")
+        # st.header("Add Your Data")
         
         col1, col2 = st.columns(2)
         
         with col1:
+            st.header("Add Your Data")
+            st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width="stretch")
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"], help="Required columns: date, description, amount | Optional columns: category")
             
         with col2:
+            st.space("stretch")
             st.write("Or try with sample data:")
             if st.button("🗂️ Use Sample Data", type="primary"):
                 try:
@@ -185,18 +187,41 @@ else:
         with col_main:
             # Show Data Editor
             if st.session_state.df is not None:
-                with st.expander("📊 Manage Data", expanded=False):
-                    edited_df = st.data_editor(st.session_state.df, num_rows="dynamic", key='data_editor')
-                    
-                    # Sync state if data changed
-                    if not edited_df.equals(st.session_state.df):
-                        st.session_state.df = edited_df
-                        st.session_state.stats = compute_stats(edited_df)
-                        st.rerun()
-            
-            if st.button("🔄 Reset / Clear Data", use_container_width=True, type="primary", help="Clear All Data"):
-                clear_data()
+                # Create containers for visual reordering
+                actions_container = st.container()
+                data_container = st.container()
+                privacy_container = st.container()
 
+                # 1. Render Data Editor (Logic first to capture edited_df)
+                with data_container:
+                    with st.expander("📊 Manage Data", expanded=False):
+                        edited_df = st.data_editor(
+                            st.session_state.df,
+                            num_rows="dynamic",
+                            key='data_editor',
+                            column_config={
+                                'date': st.column_config.DateColumn('Date', format='YYYY-MM-DD')
+                            }
+                        )
+                
+                # 2. Render Actions (Visually at top)
+                with actions_container:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    col_update, col_reset = st.columns(2)
+                    
+                    with col_update:
+                        if st.button("🔄 Update Analysis", type="primary", use_container_width=True, help="Commit changes and refresh insights"):
+                            st.session_state.df = edited_df
+                            st.session_state.stats = compute_stats(st.session_state.df)
+                            st.rerun()
+                            
+                    with col_reset:
+                        if st.button("🗑️ Reset / Clear Data", use_container_width=True, type="secondary", help="Clear All Data"):
+                            clear_data()
+
+                # 3. Render Privacy Note (Visually at bottom)
+                with privacy_container:
+                    st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width="stretch")
             st.divider()
             # Render Custom Insights Card
             render_insights_card(st.session_state.stats)
@@ -226,22 +251,42 @@ else:
                                     st.session_state.mood = mood_name
                                 st.rerun()
             
-            if st.session_state.mood:
-                # Removed text confirmation as requested
-                pass
+            # --- Dashboard Controls ---
+            st.markdown("<br>", unsafe_allow_html=True)
+            col_btn1, col_btn2 = st.columns(2)
+            
+            with col_btn1:
+                generate_clicked = st.button("✨ Generate My Money Narrative", type="primary", use_container_width=True)
                 
-                # --- Generate Story ---
-                # Always show generate button to allow regeneration
-                if st.button("✨ Generate My Money Narrative", type="primary"):
-                    with st.spinner("Writing your narrative..."):
-                        story = generate_money_story(st.session_state.stats, st.session_state.mood)
-                        st.session_state.story = story
+                if generate_clicked:
+                    st.session_state.active_view = "story"
+                    if st.session_state.mood:
+                        with st.spinner("Writing your narrative..."):
+                            story = generate_money_story(st.session_state.stats, st.session_state.mood)
+                            st.session_state.story = story
                         st.rerun()
                 
-                # --- Display Story ---
+                if generate_clicked and not st.session_state.mood:
+                    st.error("⚠️ Please select a mood first and try again.")
+                else:
+                    st.info("Select a mood above and click to generate your personalized narrative.")
+            
+            with col_btn2:
+                # Toggle logic for Charts button
+                charts_btn_type = "primary" if st.session_state.active_view == "charts" else "secondary"
+                if st.button("📈 Show Charts", type=charts_btn_type, use_container_width=True, help="Toggle between charts showing and not showing"):
+                    if st.session_state.active_view == "charts":
+                        st.session_state.active_view = "story" # Toggle off
+                    else:
+                        st.session_state.active_view = "charts" # Toggle on
+                    st.rerun()
+                st.info("Click to visualize your income, expenses, and spending trends.")
+            
+            st.divider()
+
+            # --- View Rendering ---
+            if st.session_state.active_view == "story":
                 if st.session_state.story:
-                    st.divider()
-                    
                     # The Story
                     try:
                         # Try to parse JSON. If it fails (legacy string), fallback to markdown
@@ -258,9 +303,60 @@ else:
                     except Exception as e:
                         st.error(f"Error rendering story: {e}")
                         st.markdown(st.session_state.story)
-                    
-                    st.divider()
+                elif st.session_state.active_view == "story" and not st.session_state.story:
+                     # Instructions are now under the button
+                     pass
 
+            elif st.session_state.active_view == "charts":
+                st.subheader("Spending Trends & Breakdown")
+                
+                # Prepare data for charts
+                chart_df = st.session_state.df.copy()
+                chart_df['date'] = pd.to_datetime(chart_df['date'])
+                
+                # Create 2-column layout for charts
+                chart_c1, chart_c2 = st.columns(2)
+                
+                # 1. Bar Chart: Expenses by Category
+                # Filter for expenses (negative amounts)
+                expenses_df = chart_df[chart_df['amount'] < 0].copy()
+                expenses_df['abs_amount'] = expenses_df['amount'].abs()
+                
+                with chart_c1:
+                    st.markdown("#### 💸 Expenses by Category")
+                    if not expenses_df.empty:
+                        cat_data = expenses_df.groupby('category')['abs_amount'].sum().reset_index()
+                        
+                        bar_chart = alt.Chart(cat_data).mark_bar(color="#00ADB5").encode(
+                            x=alt.X('category', sort='-y', title='Category'),
+                            y=alt.Y('abs_amount', title='Amount ($)'),
+                            tooltip=['category', alt.Tooltip('abs_amount', format='$.2f', title='Amount')]
+                        ).interactive()
+                        
+                        st.altair_chart(bar_chart, use_container_width=True)
+                    else:
+                        st.info("No expenses found to display.")
+                
+                # 2. Line Chart: Daily Net Spending
+                with chart_c2:
+                    st.markdown("#### 📅 Daily Net Spending")
+                    daily_net = chart_df.groupby(chart_df['date'].dt.date)['amount'].sum().reset_index()
+                    # Rename columns for Altair
+                    daily_net.columns = ['date', 'amount']
+                    daily_net['date'] = pd.to_datetime(daily_net['date'])
+                    
+                    line_chart = alt.Chart(daily_net).mark_line(color="#00ADB5", point=True).encode(
+                        x=alt.X('date', title='Date'),
+                        y=alt.Y('amount', title='Net Amount ($)'),
+                        tooltip=[alt.Tooltip('date', format='%Y-%m-%d'), alt.Tooltip('amount', format='$.2f', title='Net Amount')]
+                    ).interactive()
+                    
+                    st.altair_chart(line_chart, use_container_width=True)
+                    
+
+
+            # st.markdown("<br>", unsafe_allow_html=True)
+            st.divider()
             st.error("⚠️ **Disclaimer:** This is not professional financial advice. Outputs are for reflection and education only.")
 
         # --- RIGHT COLUMN: Chatbot ---

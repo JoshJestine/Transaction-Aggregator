@@ -1,55 +1,55 @@
 date,description,amount,category
-2023-10-01,Uber Ride,24.50,Transport
-2023-10-01,Morning Coffee,4.25,Dining
-2023-10-02,Starbucks,5.75,Dining
-2023-10-02,Lunch - Chipotle,11.99,Dining
-2023-10-03,Trader Joes,89.30,Groceries
-2023-10-03,Gas Station,42.00,Transport
-2023-10-04,Gym Membership,45.00,Health
-2023-10-05,Netflix Subscription,15.99,Entertainment
-2023-10-05,Spotify,10.99,Entertainment
-2023-10-06,Amazon - Books,28.99,Shopping
-2023-10-07,Shell Gas Station,45.00,Transport
-2023-10-07,Dinner - Italian Restaurant,67.50,Dining
-2023-10-08,Sweetgreen,14.50,Dining
-2023-10-09,Target - Household Items,82.45,Shopping
-2023-10-10,Rent Payment,1200.00,Housing
-2023-10-10,Coffee Shop,5.50,Dining
-2023-10-11,Uber Eats - Thai Food,28.75,Dining
-2023-10-12,Target,65.20,Shopping
-2023-10-12,Lyft to Airport,35.60,Transport
-2023-10-13,Flight Booking Fee,15.00,Travel
-2023-10-14,Uber Eats,32.40,Dining
-2023-10-14,Movie Snacks,18.50,Entertainment
-2023-10-15,AMC Theatres,28.00,Entertainment
-2023-10-16,Whole Foods,58.20,Groceries
-2023-10-16,Pharmacy - Prescriptions,22.50,Health
-2023-10-17,Coffee Meeting,6.75,Dining
-2023-10-17,Amazon - Electronics,124.99,Shopping
-2023-10-18,Whole Foods,112.50,Groceries
-2023-10-18,Parking Fee,12.00,Transport
-2023-10-19,Dry Cleaning,18.00,Other
-2023-10-20,CVS Pharmacy,18.90,Health
-2023-10-20,Lunch - Salad Bar,13.25,Dining
-2023-10-21,Uber Ride,16.80,Transport
-2023-10-21,Weekend Brunch,42.50,Dining
-2023-10-22,Lyft Ride,19.20,Transport
-2023-10-22,Groceries - Corner Store,24.60,Groceries
-2023-10-23,Phone Bill,65.00,Utilities
-2023-10-23,Dinner Out,55.30,Dining
-2023-10-24,Amazon Purchase,45.99,Shopping
-2023-10-24,Coffee Shop,4.50,Dining
-2023-10-25,Chipotle,12.80,Dining
-2023-10-25,Museum Ticket,25.00,Entertainment
-2023-10-26,Gas Station,38.75,Transport
-2023-10-26,Happy Hour Drinks,32.00,Dining
-2023-10-27,Electric Bill,85.40,Utilities
-2023-10-27,Grocery Delivery,47.20,Groceries
-2023-10-28,Internet Bill,60.00,Utilities
-2023-10-28,Lunch - Burrito Bowl,10.50,Dining
-2023-10-29,Coffee Shop,6.50,Dining
-2023-10-29,Bookstore,31.25,Shopping
+2023-10-01,Uber Ride,-24.50,Transport
+2023-10-01,Morning Coffee,-4.25,Dining
+2023-10-02,Starbucks,-5.75,Dining
+2023-10-02,Lunch - Chipotle,-11.99,Dining
+2023-10-03,Trader Joes,-89.30,Groceries
+2023-10-03,Gas Station,-42.00,Transport
+2023-10-04,Gym Membership,-45.00,Health
+2023-10-05,Netflix Subscription,-15.99,Entertainment
+2023-10-05,Spotify,-10.99,Entertainment
+2023-10-06,Amazon - Books,-28.99,Shopping
+2023-10-07,Shell Gas Station,-45.00,Transport
+2023-10-07,Dinner - Italian Restaurant,-67.50,Dining
+2023-10-08,Sweetgreen,-14.50,Dining
+2023-10-09,Target - Household Items,-82.45,Shopping
+2023-10-10,Rent Payment,-1200.00,Housing
+2023-10-10,Coffee Shop,-5.50,Dining
+2023-10-11,Uber Eats - Thai Food,-28.75,Dining
+2023-10-12,Target,-65.20,Shopping
+2023-10-12,Lyft to Airport,-35.60,Transport
+2023-10-13,Flight Booking Fee,-15.00,Travel
+2023-10-14,Uber Eats,-32.40,Dining
+2023-10-14,Movie Snacks,-18.50,Entertainment
+2023-10-15,AMC Theatres,-28.00,Entertainment
+2023-10-16,Whole Foods,-58.20,Groceries
+2023-10-16,Pharmacy - Prescriptions,-22.50,Health
+2023-10-17,Coffee Meeting,-6.75,Dining
+2023-10-17,Amazon - Electronics,-124.99,Shopping
+2023-10-18,Whole Foods,-112.50,Groceries
+2023-10-18,Parking Fee,-12.00,Transport
+2023-10-19,Dry Cleaning,-18.00,Other
+2023-10-20,CVS Pharmacy,-18.90,Health
+2023-10-20,Lunch - Salad Bar,-13.25,Dining
+2023-10-21,Uber Ride,-16.80,Transport
+2023-10-21,Weekend Brunch,-42.50,Dining
+2023-10-22,Lyft Ride,-19.20,Transport
+2023-10-22,Groceries - Corner Store,-24.60,Groceries
+2023-10-23,Phone Bill,-65.00,Utilities
+2023-10-23,Dinner Out,-55.30,Dining
+2023-10-24,Amazon Purchase,-45.99,Shopping
+2023-10-24,Coffee Shop,-4.50,Dining
+2023-10-25,Chipotle,-12.80,Dining
+2023-10-25,Museum Ticket,-25.00,Entertainment
+2023-10-26,Gas Station,-38.75,Transport
+2023-10-26,Happy Hour Drinks,-32.00,Dining
+2023-10-27,Electric Bill,-85.40,Utilities
+2023-10-27,Grocery Delivery,-47.20,Groceries
+2023-10-28,Internet Bill,-60.00,Utilities
+2023-10-28,Lunch - Burrito Bowl,-10.50,Dining
+2023-10-29,Coffee Shop,-6.50,Dining
+2023-10-29,Bookstore,-31.25,Shopping
 2023-10-30,Salary Deposit,3500.00,Income
-2023-10-30,Target - Cleaning Supplies,28.90,Shopping
-2023-10-31,Halloween Party Supplies,43.20,Entertainment
-2023-10-31,Uber Ride Home,22.50,Transport
+2023-10-30,Target - Cleaning Supplies,-28.90,Shopping
+2023-10-31,Halloween Party Supplies,-43.20,Entertainment
+2023-10-31,Uber Ride Home,-22.50,Transport

@@ -25,7 +25,7 @@ def generate_chat_response(history, stats, story_context):
     - Keep responses under ~150 words.
     - Always avoid investment advice.
     - Focus on explanation, reflection, and small behavior changes.
-    - Use simple plain text and bullet points for structure.
+    - Use simple plain English text and bullet points for structure.
     """
     
     # Construct the chat history for Gemini
