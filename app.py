@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import json
+import time
 import urllib.parse
 import altair as alt
 from config.settings import APP_NAME, SAMPLE_DATA_PATH
@@ -35,6 +36,10 @@ if "username" not in st.session_state:
     st.session_state.username = None
 if "active_view" not in st.session_state:
     st.session_state.active_view = "story"
+if "narrative_cache" not in st.session_state:
+    st.session_state.narrative_cache = {}
+if "narrative_visible" not in st.session_state:
+    st.session_state.narrative_visible = True
 
 def logout():
     """Clear all session state data including username."""
@@ -44,6 +49,7 @@ def logout():
     st.session_state.mood = None
     st.session_state.df = None
     st.session_state.username = None
+    st.session_state.narrative_cache = {}
     st.rerun()
 
 def clear_data():
@@ -53,6 +59,7 @@ def clear_data():
     st.session_state.chat_history = []
     st.session_state.mood = None
     st.session_state.df = None
+    st.session_state.narrative_cache = {}
     st.rerun()
 
 # --- Welcome Screen ---
@@ -213,6 +220,9 @@ else:
                         if st.button("🔄 Update Analysis", type="primary", use_container_width=True, help="Commit changes and refresh insights"):
                             st.session_state.df = edited_df
                             st.session_state.stats = compute_stats(st.session_state.df)
+                            # Clear narrative cache when data changes to force fresh generation
+                            st.session_state.narrative_cache = {}
+                            st.session_state.story = None
                             st.rerun()
                             
                     with col_reset:
@@ -253,17 +263,32 @@ else:
             
             # --- Dashboard Controls ---
             st.markdown("<br>", unsafe_allow_html=True)
-            col_btn1, col_btn2 = st.columns(2)
+            col_gen, col_toggle, col_chart = st.columns(3)
             
-            with col_btn1:
-                generate_clicked = st.button("✨ Generate My Money Narrative", type="primary", use_container_width=True)
+            with col_gen:
+                generate_clicked = st.button("✨ Generate My Money Narrative", type="primary", use_container_width=True, help="Get personalized money narrative")
                 
                 if generate_clicked:
                     st.session_state.active_view = "story"
+                    st.session_state.narrative_visible = True # Force visibility on generate
                     if st.session_state.mood:
-                        with st.spinner("Writing your narrative..."):
-                            story = generate_money_story(st.session_state.stats, st.session_state.mood)
-                            st.session_state.story = story
+                        selected_mood = st.session_state.mood
+                        
+                        # Check if narrative for this mood is already cached
+                        if selected_mood in st.session_state.narrative_cache:
+                            # Retrieve cached narrative
+                            st.session_state.story = st.session_state.narrative_cache[selected_mood]
+                            st.toast(f"📖 Loaded cached narrative for '{selected_mood}' mood!", icon="⚡")
+                        else:
+                            # Generate new narrative and cache it
+                            with st.spinner("Writing your narrative...", show_time=False):
+                                # Convert dataframe to CSV string for the story generator context
+                                transaction_csv = st.session_state.df.to_csv(index=False) if st.session_state.df is not None else None
+                                
+                                story = generate_money_story(st.session_state.stats, selected_mood, transaction_data=transaction_csv)
+                                st.session_state.story = story
+                                # Cache the generated narrative
+                                st.session_state.narrative_cache[selected_mood] = story
                         st.rerun()
                 
                 if generate_clicked and not st.session_state.mood:
@@ -271,22 +296,28 @@ else:
                 else:
                     st.info("Select a mood above and click to generate your personalized narrative.")
             
-            with col_btn2:
+            with col_toggle:
+                if st.button("👁️ Show/Hide Narrative", use_container_width=True, help="Toggle to hide or reveal your narrative"):
+                    st.session_state.narrative_visible = not st.session_state.narrative_visible
+                    st.rerun()
+                st.info("Toggle to see or hide your narrative without regenerating it.")
+
+            with col_chart:
                 # Toggle logic for Charts button
                 charts_btn_type = "primary" if st.session_state.active_view == "charts" else "secondary"
-                if st.button("📈 Show Charts", type=charts_btn_type, use_container_width=True, help="Toggle between charts showing and not showing"):
+                if st.button("📈 Show/Hide Charts", type=charts_btn_type, use_container_width=True, help="Toggle to hide or reveal your charts"):
                     if st.session_state.active_view == "charts":
                         st.session_state.active_view = "story" # Toggle off
                     else:
                         st.session_state.active_view = "charts" # Toggle on
                     st.rerun()
-                st.info("Click to visualize your income, expenses, and spending trends.")
+                st.info("Toggle to visualize your income, expenses, and spending trends.")
             
             st.divider()
 
             # --- View Rendering ---
             if st.session_state.active_view == "story":
-                if st.session_state.story:
+                if st.session_state.story and st.session_state.narrative_visible:
                     # The Story
                     try:
                         # Try to parse JSON. If it fails (legacy string), fallback to markdown
@@ -364,7 +395,7 @@ else:
             # Header with Clear History Button
             c1, c2 = st.columns([5, 1], vertical_alignment="center")
             with c1:
-                st.markdown("### 💬 Money Mentor Chat")
+                st.markdown("### 💬 Chat with Finn")
             with c2:
                 if st.button("🔄", help="Clear Chat History", type="primary", use_container_width=True):
                     st.session_state.chat_history = []
@@ -374,7 +405,7 @@ else:
             with st.container(height=400, border=True):
                 # Display chat history
                 if not st.session_state.chat_history:
-                    st.info("Ask me anything about your spending!")
+                    st.info("👋 Hi! I'm Finn, your Money Mentor. Ask me anything about your spending!")
                 
                 for message in st.session_state.chat_history:
                     with st.chat_message(message["role"]):
@@ -399,7 +430,7 @@ else:
 
             # Input for chat (using form to keep it in the column flow)
             with st.form(key="chat_form", clear_on_submit=True):
-                user_input = st.text_area("Ask a question...", height=100)
+                user_input = st.text_area("Ask Finn anything about your spending...", height=100)
                 submit_chat = st.form_submit_button("Send", use_container_width=True, type="primary")
                 
                 if submit_chat and user_input:
@@ -412,10 +443,14 @@ else:
                     
                     # Generate response logic
                     with st.spinner("Thinking..."):
+                        # Convert dataframe to CSV string for the chatbot context
+                        transaction_csv = st.session_state.df.to_csv(index=False) if st.session_state.df is not None else None
+                        
                         response = generate_chat_response(
                             st.session_state.chat_history,
                             st.session_state.stats,
-                            st.session_state.story if st.session_state.story else ""
+                            st.session_state.story if st.session_state.story else "",
+                            transaction_data=transaction_csv
                         )
                         
                     # Add assistant response to history
