@@ -3,7 +3,7 @@
 </div>
 
 ---
-A friendly, privacy-focused web app that turns your transaction data into a calm, "Money narrative". Designed for students, young adults, and even professionals who are busy and want to understand their spending without being overwhelmed by complex dashboards.
+A friendly, privacy-focused web app that turns your transaction data into a calm, "Money Narrative". Designed for students, young adults, and even professionals who are busy and want to understand their spending without being overwhelmed by complex dashboards.
 
 ## 🌟 Features
 -   **Simple Data Input**: Upload a CSV or use sample data to get started instantly.
