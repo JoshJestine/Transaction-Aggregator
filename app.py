@@ -65,18 +65,9 @@ def clear_data():
 # --- Welcome Screen ---
 if not st.session_state.username:
     # Header: Spacer | Logo (Centered) | Accessibility (Right)
-    # Using [1, 5, 1] to ensure symmetry for centering the logo, while keeping button on far right.
     col_l, col_c, col_r, col_ = st.columns([1, 0.65, 1, 0.4], vertical_alignment="center")
     
     with col_c:
-        # Centered Logo
-        # Use columns inside to center the image if needed, or just standard image centering
-        # st.image doesn't have alignment, but inside a column it aligns left.
-        # To center, we can use another set of columns or CSS.
-        # Or just rely on the column being centered? No, content aligns left.
-        # Let's use the 'use_container_width' and maybe a smaller column ratio if we want it tight?
-        # User said "image stays in its current position in center of screen".
-        # Let's try to just place it in the middle column.
         st.image("assets/SpendLensLogo.png", use_container_width=True)
         
     with col_:
@@ -130,8 +121,6 @@ else:
             show_accessibility_modal()
 
     with col_logout:
-        # Using a container to push button to the right if needed, 
-        # but standard column behavior with use_container_width should be fine or just default.
         if st.button("➜] Log Out", width="stretch", type="primary", help="Go Back to Login Page"):
             logout()
 
@@ -411,21 +400,6 @@ else:
                     with st.chat_message(message["role"]):
                         st.markdown(message["content"])
 
-                # Chat Input
-                # Note: st.chat_input is fixed to bottom of the container/page usually.
-                # When inside a column, it might behave differently or stick to bottom of column.
-                # Let's try placing it inside the container or just below it.
-                # st.chat_input always sticks to bottom of viewport in standard mode.
-                # To make it stick to the column, we might need to use st.text_input + button or accept the bottom placement.
-                # However, Streamlit's st.chat_input is designed to be at the bottom of the *script* execution flow or main area.
-                # If we want it in the sidebar/column, it might still float at bottom.
-                
-                # Let's try using st.chat_input normally. It will likely stay at the bottom of the screen, spanning the width.
-                # If we want it restricted to the column, we might need a workaround or accept it.
-                # Actually, st.chat_input takes the full width of its parent container if placed inside one?
-                # No, st.chat_input is always fixed to bottom.
-                
-                # Alternative: Use a form with text_input for a "contained" chat experience in the right column.
                 pass 
 
             # Input for chat (using form to keep it in the column flow)
@@ -437,9 +411,6 @@ else:
                     # Add user message to history
                     st.session_state.chat_history.append({"role": "user", "content": user_input})
                     
-                    # Generate response
-                    # We need to rerun to show the user message immediately? 
-                    # Streamlit forms rerun on submit.
                     
                     # Generate response logic
                     with st.spinner("Thinking..."):
@@ -485,7 +456,6 @@ else:
                     with res_col2:
                         st.link_button(f"{res['title']}", res['url'], help=f"Source: {res['source']}", use_container_width=True)
                     
-
 
 # Footer
 # st.markdown("---")

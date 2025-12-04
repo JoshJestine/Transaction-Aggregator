@@ -242,12 +242,6 @@ def render_story_card(act):
     safe_prompt = urllib.parse.quote(act['visual_prompt'])
     image_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=400&height=300&nologo=true"
     
-    # We use a container to apply the styling, but Streamlit containers don't support custom classes directly on the div easily without hacky JS.
-    # So we will render the HTML structure for the card content.
-    # Note: Streamlit markdown with HTML allows us to build the card.
-    
-    # However, rendering the image inside the HTML might be tricky if we want Streamlit's image optimization, 
-    # but standard <img> tag works fine for external URLs.
     
     html = f"""
     <div class="story-card">
@@ -267,22 +261,9 @@ def render_story_card(act):
     </div>
     """
     
-    # BETTER APPROACH: Use st.container and apply style to the container? No, can't target specific container.
-    # Let's use the HTML approach but maybe strip markdown or use a simple parser if needed.
-    # Or, we can just render the image and text using Streamlit widgets inside a column, 
-    # and wrap that column in a styled container using a custom component or just CSS targeting?
-    # The user asked for "Wrap the content... inside a styled container".
-    
-    # Let's stick to the HTML card for best visual control, matching the insight card.
-    # We will assume the content is mostly text. If bolding is needed, we can do a quick replace.
     
     content_html = act['content'].replace("**", "<b>").replace("**", "</b>") # Simple bold support
-    # Note: The replace above is flawed (replaces both with <b>).
-    # Let's just render the text as is, or use a library if available. 
-    # Actually, let's just use st.markdown inside a container if possible.
-    
-    # Re-evaluating: The user wants a "Card Style".
-    # We can create the card visual using HTML.
+
     
     html = f"""
     <div class="story-card">
@@ -293,16 +274,8 @@ def render_story_card(act):
         </div>
     </div>
     """
-    # Wait, the replace logic was bad. Let's fix it or just pass text.
-    # Let's use a regex or just leave it. The browser might display **text**.
-    # Let's try to use `markdown` library if installed, or just `st.markdown`?
-    # We can't nest `st.markdown` inside HTML string.
     
-    # Revised approach for `render_story_card`:
-    # Use HTML for the container and header/image, but maybe just text for content?
-    # Or better: Just use the HTML and simple formatting.
     
-    # Let's use a simple bold parser.
     import re
     formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', act['content'])
     
@@ -371,9 +344,6 @@ def show_accessibility_modal():
                     </div>
                     """
                     st.markdown(html, unsafe_allow_html=True)
-
-    
-    
 
 
 def get_mood_emojis():

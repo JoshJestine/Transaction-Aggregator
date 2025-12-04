@@ -62,10 +62,6 @@ def generate_chat_response(history, stats, story_context, transaction_data=None)
     - Your response should look like a standard text message, NOT a math equation or formatted document.
     """
     
-    # Construct the chat history for Gemini
-    # Gemini expects a list of Content objects or a specific format.
-    # We'll use a simple approach: create a new chat session with context.
-    
     try:
         model = genai.GenerativeModel(GEMINI_MODEL_NAME)
         chat = model.start_chat(history=[])
@@ -80,25 +76,12 @@ def generate_chat_response(history, stats, story_context, transaction_data=None)
         # Send context first (invisible to user in UI, but primes the model)
         chat.send_message(context_msg)
         
-        # Replay history to get state up to date
-        # Note: 'history' arg passed to this function is list of dicts: {"role": "user"/"assistant", "content": "..."}
-        # We need to be careful not to double-send. 
-        # Ideally, we just send the *last* message if we are maintaining state, but Streamlit re-runs.
-        # For a stateless approach with Gemini's `start_chat`, we can feed the history.
-        
-        # However, `chat.history` in Gemini is a property. We can't easily inject it.
-        # A robust way for this stateless function is to construct a prompt chain or use `generate_content` with full history.
-        
         full_prompt = context_msg + "\n\nChat History:\n"
         for msg in history:
             role = "User" if msg["role"] == "user" else "Finn"
             full_prompt += f"{role}: {msg['content']}\n"
             
-        # The last message in 'history' is the user's new question (added in app.py before calling this).
-        # Wait, app.py appends to session_state.chat_history BEFORE calling this.
-        # So the last item in `history` is the new prompt.
-        
-        # Let's just send the full prompt to generate_content for simplicity and reliability in this stateless context.
+            
         response = model.generate_content(full_prompt)
         return response.text
 
