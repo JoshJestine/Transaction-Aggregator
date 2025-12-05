@@ -54,6 +54,7 @@ def generate_money_story(stats, mood, transaction_data=None):
     - Use plain English text only.
     """
 
+    # Build the user prompt with mood and stats
     user_prompt = f"""
     User Mood: {mood}
     

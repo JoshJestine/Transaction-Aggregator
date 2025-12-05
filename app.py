@@ -140,11 +140,13 @@ else:
         
         col1, col2 = st.columns(2)
         
+        # --- Data Upload Column ---
         with col1:
             st.header("Add Your Data")
             st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width="stretch")
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"], help="Required columns: date, description, amount | Optional columns: category")
-            
+        
+        # --- Sample Data Column ---
         with col2:
             st.space("stretch")
             st.write("Or try with sample data:")
@@ -157,6 +159,7 @@ else:
                 except Exception as e:
                     st.error(f"Error loading sample data: {e}")
 
+        # --- Data Processing ---
         if uploaded_file:
             try:
                 df = load_data(uploaded_file)
@@ -188,7 +191,7 @@ else:
                 data_container = st.container()
                 privacy_container = st.container()
 
-                # 1. Render Data Editor (Logic first to capture edited_df)
+                # Render Data Editor (Logic first to capture edited_df)
                 with data_container:
                     with st.expander("📊 Manage Data", expanded=False):
                         edited_df = st.data_editor(
@@ -200,7 +203,7 @@ else:
                             }
                         )
                 
-                # 2. Render Actions (Visually at top)
+                #  Render Actions (Visually at top)
                 with actions_container:
                     st.markdown("<br>", unsafe_allow_html=True)
                     col_update, col_reset = st.columns(2)
@@ -218,7 +221,7 @@ else:
                         if st.button("🗑️ Reset / Clear Data", use_container_width=True, type="secondary", help="Clear All Data"):
                             clear_data()
 
-                # 3. Render Privacy Note (Visually at bottom)
+                #  Render Privacy Note (Visually at bottom)
                 with privacy_container:
                     st.info("🔒 **Privacy Note:** Your data is processed locally in memory and is never saved to disk or sent to any server.", width="stretch")
             st.divider()
@@ -285,6 +288,7 @@ else:
                 else:
                     st.info("Select a mood above and click to generate your personalized narrative.")
             
+            # --- Toggle Buttons ---
             with col_toggle:
                 if st.button("👁️ Show/Hide Narrative", use_container_width=True, help="Toggle to hide or reveal your narrative"):
                     st.session_state.narrative_visible = not st.session_state.narrative_visible
@@ -324,8 +328,7 @@ else:
                         st.error(f"Error rendering story: {e}")
                         st.markdown(st.session_state.story)
                 elif st.session_state.active_view == "story" and not st.session_state.story:
-                     # Instructions are now under the button
-                     pass
+                    pass
 
             elif st.session_state.active_view == "charts":
                 st.subheader("Spending Trends & Breakdown")
@@ -431,6 +434,7 @@ else:
             st.divider()
             st.markdown("### 📚 Financial Resources")
             
+            # Resource Links
             resources = [
                 { "title": "Budgeting Basics", "source": "Consumer.gov", "url": "https://consumer.gov/managing-your-money/making-budget" },
                 { "title": "Saving and Investing", "source": "Investor.gov (SEC)", "url": "https://www.investor.gov/introduction-investing" },

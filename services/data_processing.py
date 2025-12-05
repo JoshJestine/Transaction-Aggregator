@@ -18,6 +18,7 @@ def validate_data(df):
     Validate that the DataFrame has the required columns.
     Required: date, description, amount
     """
+    # Check for required columns
     required_cols = {'date', 'description', 'amount'}
     if not required_cols.issubset(df.columns):
         missing = required_cols - set(df.columns)
@@ -36,7 +37,7 @@ def categorize_transaction(description, existing_category=None):
     """
     Simple rule-based categorization if category is missing.
     """
-    if pd.notna(existing_category):
+    if pd.notna(existing_category):  # Return existing category if present
         return existing_category
         
     desc = description.lower()

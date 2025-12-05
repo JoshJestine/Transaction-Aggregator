@@ -2,9 +2,9 @@ import google.generativeai as genai
 from config.settings import GEMINI_API_KEY, GEMINI_MODEL_NAME
 
 def configure_genai():
-    if not GEMINI_API_KEY:
+    if not GEMINI_API_KEY: # No API key configured
         return False
-    genai.configure(api_key=GEMINI_API_KEY)
+    genai.configure(api_key=GEMINI_API_KEY) # Set the API key
     return True
 
 def generate_chat_response(history, stats, story_context, transaction_data=None):
@@ -17,7 +17,7 @@ def generate_chat_response(history, stats, story_context, transaction_data=None)
         story_context: Generated narrative story
         transaction_data: DataFrame converted to string (CSV format) for detailed queries
     """
-    if not configure_genai():
+    if not configure_genai():  # Ensure Gemini is configured
         return "Error: Gemini API Key not found."
 
     system_prompt = """
@@ -64,7 +64,7 @@ def generate_chat_response(history, stats, story_context, transaction_data=None)
     
     try:
         model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-        chat = model.start_chat(history=[])
+        chat = model.start_chat(history=[]) # Start with empty history to control context
         
         # Build the context message with all available data
         context_msg = f"{system_prompt}\n\nFinancial Stats: {stats}\n\nGenerated Story: {story_context}"
@@ -76,13 +76,13 @@ def generate_chat_response(history, stats, story_context, transaction_data=None)
         # Send context first (invisible to user in UI, but primes the model)
         chat.send_message(context_msg)
         
+        # Now build the full prompt including chat history
         full_prompt = context_msg + "\n\nChat History:\n"
         for msg in history:
             role = "User" if msg["role"] == "user" else "Finn"
             full_prompt += f"{role}: {msg['content']}\n"
-            
-            
-        response = model.generate_content(full_prompt)
+               
+        response = model.generate_content(full_prompt)  # Generate the response
         return response.text
 
     except Exception as e:

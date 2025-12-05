@@ -4,6 +4,7 @@ def apply_custom_styles():
     """
     Apply minimal custom CSS for a cleaner look.
     """
+    # Custom CSS for metric cards and global styles
     st.markdown("""
         <style>
 
@@ -99,6 +100,7 @@ def render_insights_card(stats):
 
     top_cat = stats['top_categories'][0]['category'] if stats['top_categories'] else "N/A"
     
+    # Custom HTML for the insights card
     html = f"""
     <div class="insight-card">
         <div class="insight-header">Your Money Insights</div>
@@ -249,18 +251,9 @@ def render_story_card(act):
         <img src="{image_url}" class="story-image" alt="{act['title']}">
         <div class="story-content">
             {act['content']} # We might need to convert markdown to HTML here if content has markdown.
-            # For now, assuming simple text or basic markdown. 
-            # If content has markdown, we should use a library or just let it be text.
-            # The prompt asks for "Markdown allowed", so we should ideally parse it.
-            # But putting markdown inside HTML div in st.markdown(..., unsafe_allow_html=True) doesn't parse the markdown.
-            # We can use a simple replace for bolding if needed, or just display as text.
-            # Let's try to keep it simple: The system prompt says "Markdown allowed".
-            # If we want to render markdown inside this HTML card, it's complex.
-            # Alternative: Use st.container() and styling.
         </div>
     </div>
     """
-    
     
     content_html = act['content'].replace("**", "<b>").replace("**", "</b>") # Simple bold support
 
@@ -277,7 +270,7 @@ def render_story_card(act):
     
     
     import re
-    formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', act['content'])
+    formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', act['content']) # Bold
     
     html = f"""
     <div class="story-card">
@@ -328,7 +321,7 @@ def show_accessibility_modal():
     ]
     
     # Grid Layout: 3 columns
-    # We will iterate and create rows of 3
+    # will iterate and create rows of 3
     
     for i in range(0, len(rules), 3):
         cols = st.columns(3)
